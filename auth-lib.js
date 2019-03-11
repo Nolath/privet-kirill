@@ -4,10 +4,10 @@ function users() {
 };
 
 function createUser(username, password) {
-	if (typeof(allUsers) == "undefined") throw new Error("База пользователей не существует");
-	if (typeof(username) != "string" || typeof(password) != "string") throw new Error("Входной параметр не имеет тип string");
+	if (typeof(allUsers) == 'undefined') throw new Error('База пользователей не существует');
+	if (typeof(username) != 'string' || typeof(password) != 'string') throw new Error('Входной параметр не имеет тип string');
 	for (index = 0; index < allUsers.length; index++)
-		if (allUsers[index].nickname == username) throw new Error("Пользователь с таким ником уже существует");
+		if (allUsers[index].nickname == username) throw new Error('Пользователь с таким ником уже существует');
 	let newUser = {};
 	newUser.nickname = username;
 	newUser.password = password;
@@ -26,67 +26,67 @@ function compareUsers(u1, u2) {//вспомогательный
 };
 
 function userExists(user) {//вспомогательный
-	if (typeof(user) != "object") throw new Error("Входной параметр не имеет тип object");
+	if (typeof(user) != 'object') throw new Error('Входной параметр не имеет тип object');
 	let index = -1;
 	for (let i = 0; i < allUsers.length; i++) 
 		if (compareUsers(user, allUsers[i])) {
 			index = i;
 			break;
 	}
-	if (index == -1) throw new Error("Указанного пользователя не существует");
+	if (index == -1) throw new Error('Указанного пользователя не существует');
   return index;
 };
 
 function deleteUser(user) {
-	if (typeof(allUsers) == "undefined") throw new Error("База пользователей не существует");
-	if (typeof(user) != "object") throw new Error("Входной параметр не имеет тип object");
-	if (Object.keys(user)[0] != "nickname" || Object.keys(user)[1] != "password" || Object.keys(user)[2] != "groups")
-		throw new Error("Входной параметр не имеет необходимых ключей");
+	if (typeof(allUsers) == 'undefined') throw new Error('База пользователей не существует');
+	if (typeof(user) != 'object') throw new Error('Входной параметр не имеет тип object');
+	if (Object.keys(user)[0] != 'nickname' || Object.keys(user)[1] != 'password' || Object.keys(user)[2] != 'groups')
+		throw new Error('Входной параметр не имеет необходимых ключей');
 	if (session.includes(user.nickname)) session.splice(session.indexOf(user.nickname), 1);
 	allUsers.splice(userExists(user), 1);
 };
 
 function groups() {
-	if (typeof(allRights) == "undefined") throw new Error("База прав не существует");
-	if (typeof(allGroups) == "undefined") throw new Error("База групп не существует");
+	if (typeof(allRights) == 'undefined') throw new Error('База прав не существует');
+	if (typeof(allGroups) == 'undefined') throw new Error('База групп не существует');
 	return allGroups;
 };
 
 function createGroup() {
-	if (typeof(allRights) == "undefined") throw new Error("База прав не существует");
-	if (typeof(allGroups) == "undefined") throw new Error("База групп не существует");
-	let name = "group" + groupCounter++;
+	if (typeof(allRights) == 'undefined') throw new Error('База прав не существует');
+	if (typeof(allGroups) == 'undefined') throw new Error('База групп не существует');
+	let name = 'group' + groupCounter++;
 	allGroups[name] = [];
 };
 
 function groupExists(group) { //вспомогательный
-	if (typeof(group) == "string") throw new Error("Входной параметр не имеет тип string");
+	if (typeof(group) == 'string') throw new Error('Входной параметр не имеет тип string');
 	let index = -1;
 	for (let i = 0; i < Object.keys(allGroups).length; i++)
 		if (Object.keys(allGroups)[i] == group) {
 			index = i;
 			break;
 	}
-	if (index == -1) throw new Error("Указанной группы не существует");
+	if (index == -1) throw new Error('Указанной группы не существует');
 	return index;
 };
 
 function deleteGroup(group) {
-	if (typeof(allRights) == "undefined") throw new Error("База прав не существует");
-	if (typeof(allGroups) == "undefined") throw new Error("База групп не существует");
-	if (typeof(group) == "string") throw new Error("Входной параметр не имеет тип string");
+	if (typeof(allRights) == 'undefined') throw new Error('База прав не существует');
+	if (typeof(allGroups) == 'undefined') throw new Error('База групп не существует');
+	if (typeof(group) == 'string') throw new Error('Входной параметр не имеет тип string');
 	groupExists(group);
 	let count = 0;
 	for (let i = 0; i < allUsers.length; i++)
 		if (allUsers[i].groups.includes(group)) count++;
-	if (count) throw new Error("Нельзя удалить группу, в которой состоят пользователи")
+	if (count) throw new Error('Нельзя удалить группу, в которой состоят пользователи')
 	delete allGroups[group];
 };
 
 function deleteGroupAnyway(group) {//альтернативный
-	if (typeof(allRights) == "undefined") throw new Error("База прав не существует");
-	if (typeof(allGroups) == "undefined") throw new Error("База групп не существует");
-	if (typeof(group) == "string") throw new Error("Входной параметр не имеет тип string");
+	if (typeof(allRights) == 'undefined') throw new Error('База прав не существует');
+	if (typeof(allGroups) == 'undefined') throw new Error('База групп не существует');
+	if (typeof(group) == 'string') throw new Error('Входной параметр не имеет тип string');
 	groupExists(group);
 	for (let i = 0; i < allUsers.length; i++)
 		removeUserFromGroup(allUsers, group);
@@ -94,159 +94,159 @@ function deleteGroupAnyway(group) {//альтернативный
 };
 
 function userGroups(user) {
-	if (typeof(allUsers) == "undefined") throw new Error("База пользователей не существует");
-	if (typeof(user) != "object") throw new Error("Входной параметр не имеет тип object");
-	if (Object.keys(user)[0] != "nickname" || Object.keys(user)[1] != "password" || Object.keys(user)[2] != "groups")
-		throw new Error("Входной параметр не имеет необходимых ключей");
+	if (typeof(allUsers) == 'undefined') throw new Error('База пользователей не существует');
+	if (typeof(user) != 'object') throw new Error('Входной параметр не имеет тип object');
+	if (Object.keys(user)[0] != 'nickname' || Object.keys(user)[1] != 'password' || Object.keys(user)[2] != 'groups')
+		throw new Error('Входной параметр не имеет необходимых ключей');
 	let u = userExists(user);
 	if (typeof(allUsers[u].groups) == undefined || allUsers[u].groups.length == 0) 
-		throw new Error("Пользователь не состоит в каких-либо группах");
+		throw new Error('Пользователь не состоит в каких-либо группах');
 	return allUsers[u].groups;
 };
 
 function addUserToGroup(user, group) {
-	if (typeof(allUsers) == "undefined") throw new Error("База пользователей не существует");
-	if (typeof(allRights) == "undefined") throw new Error("База прав не существует");
-	if (typeof(allGroups) == "undefined") throw new Error("База групп не существует");
-	if (typeof(user) != "object") throw new Error("Входной параметр не имеет тип object");
-	if (Object.keys(user)[0] != "nickname" || Object.keys(user)[1] != "password" || Object.keys(user)[2] != "groups")
-		throw new Error("Входной параметр не имеет необходимых ключей");
+	if (typeof(allUsers) == 'undefined') throw new Error('База пользователей не существует');
+	if (typeof(allRights) == 'undefined') throw new Error('База прав не существует');
+	if (typeof(allGroups) == 'undefined') throw new Error('База групп не существует');
+	if (typeof(user) != 'object') throw new Error('Входной параметр не имеет тип object');
+	if (Object.keys(user)[0] != 'nickname' || Object.keys(user)[1] != 'password' || Object.keys(user)[2] != 'groups')
+		throw new Error('Входной параметр не имеет необходимых ключей');
 	let u = userExists(user);
-	if (typeof(group) != "string") throw new Error("Входной параметр не имеет тип string");
+	if (typeof(group) != 'string') throw new Error('Входной параметр не имеет тип string');
 	let g = groupExists(group);
-	if (allUsers[u].groups.includes(Object.keys(allGroups)[g])) throw new Error("Пользователь уже состоит в этой группе");
+	if (allUsers[u].groups.includes(Object.keys(allGroups)[g])) throw new Error('Пользователь уже состоит в этой группе');
 	allUsers[u].groups.push(Object.keys(allGroups)[g]);
 };
 
 function removeUserFromGroup(user, group) {
-	if (typeof(allUsers) == "undefined") throw new Error("База пользователей не существует");
-	if (typeof(allRights) == "undefined") throw new Error("База прав не существует");
-	if (typeof(allGroups) == "undefined") throw new Error("База групп не существует");
-	if (typeof(user) != "object") throw new Error("Входной параметр не имеет тип object");
-	if (Object.keys(user)[0] != "nickname" || Object.keys(user)[1] != "password" || Object.keys(user)[2] != "groups")
-		throw new Error("Входной параметр не имеет необходимых ключей");
+	if (typeof(allUsers) == 'undefined') throw new Error('База пользователей не существует');
+	if (typeof(allRights) == 'undefined') throw new Error('База прав не существует');
+	if (typeof(allGroups) == 'undefined') throw new Error('База групп не существует');
+	if (typeof(user) != 'object') throw new Error('Входной параметр не имеет тип object');
+	if (Object.keys(user)[0] != 'nickname' || Object.keys(user)[1] != 'password' || Object.keys(user)[2] != 'groups')
+		throw new Error('Входной параметр не имеет необходимых ключей');
 	let u = userExists(user);
-	if (typeof(group) != "string") throw new Error("Входной параметр не имеет тип string");
+	if (typeof(group) != 'string') throw new Error('Входной параметр не имеет тип string');
 	let g = groupExists(group);
-	if (!allUsers[u].groups.includes(Object.keys(allGroups)[g])) throw new Error("Пользователь не состоит в этой группе");
+	if (!allUsers[u].groups.includes(Object.keys(allGroups)[g])) throw new Error('Пользователь не состоит в этой группе');
 	allUsers[u].groups.splice(g, 1);
 };
 
 function createRight() {
-	if (typeof(allRights) == "undefined") throw new Error("База прав не существует");
-	let name = "right" + rightCounter++;
+	if (typeof(allRights) == 'undefined') throw new Error('База прав не существует');
+	let name = 'right' + rightCounter++;
 	allRights.push(name);
 };
 
 function deleteRight(right) {
-	if (typeof(allRights) == "undefined") throw new Error("База прав не существует");
-	if (typeof(right) != "string") throw new Error("Входной параметр не имеет тип string");
+	if (typeof(allRights) == 'undefined') throw new Error('База прав не существует');
+	if (typeof(right) != 'string') throw new Error('Входной параметр не имеет тип string');
 	let r = allRights.indexOf(right);
-	if (r == -1) throw new Error("Заданного права не существует");
+	if (r == -1) throw new Error('Заданного права не существует');
 	allRights.splice(r, 1);
 };
 
 function groupRights(group) {
-	if (typeof(allRights) == "undefined") throw new Error("База прав не существует");
-	if (typeof(allGroups) == "undefined") throw new Error("База групп не существует");
-	if (typeof(group) != "string") throw new Error("Входной параметр не имеет тип string"); 
+	if (typeof(allRights) == 'undefined') throw new Error('База прав не существует');
+	if (typeof(allGroups) == 'undefined') throw new Error('База групп не существует');
+	if (typeof(group) != 'string') throw new Error('Входной параметр не имеет тип string'); 
 	groupExists(group);
 	return allGroups[group];
 };
 
 function rights() {
-	if (typeof(allRights) == "undefined") throw new Error("База прав не существует");
+	if (typeof(allRights) == 'undefined') throw new Error('База прав не существует');
 	return allRights;
 };
 
 function addRightToGroup(right, group) {
-	if (typeof(allRights) == "undefined") throw new Error("База прав не существует");
-	if (typeof(allGroups) == "undefined") throw new Error("База групп не существует");
-	if (typeof(group) != "string" ||) throw new Error("Входной параметр не имеет тип string");
-	if (typeof(right) != "string") throw new Error("Входной параметр не имеет тип string");
+	if (typeof(allRights) == 'undefined') throw new Error('База прав не существует');
+	if (typeof(allGroups) == 'undefined') throw new Error('База групп не существует');
+	if (typeof(group) != 'string') throw new Error('Входной параметр не имеет тип string');
+	if (typeof(right) != 'string') throw new Error('Входной параметр не имеет тип string');
 	let r = allRights.indexOf(right);
-	if (r == -1) throw new Error("Заданного права не существует");
+	if (r == -1) throw new Error('Заданного права не существует');
 	groupExists(group);
-	if (allGroups[group].includes(allRights[r])) throw new Error("Группа уже имеет данное право");
+	if (allGroups[group].includes(allRights[r])) throw new Error('Группа уже имеет данное право');
 	allGroups[group].push(allRights[r]);
 };
 
 function removeRightFromGroup(right, group) {
-if (typeof(allRights) == "undefined") throw new Error("База прав не существует");
-	if (typeof(allGroups) == "undefined") throw new Error("База групп не существует");
-	if (typeof(group) != "string") throw new Error("Входной параметр не имеет тип string");
-	if (typeof(right) != "string") throw new Error("Входной параметр не имеет тип string");
+if (typeof(allRights) == 'undefined') throw new Error('База прав не существует');
+	if (typeof(allGroups) == 'undefined') throw new Error('База групп не существует');
+	if (typeof(group) != 'string') throw new Error('Входной параметр не имеет тип string');
+	if (typeof(right) != 'string') throw new Error('Входной параметр не имеет тип string');
 	let r = allRights.indexOf(right);
-	if (r == -1) throw new Error("Заданного права не существует");
+	if (r == -1) throw new Error('Заданного права не существует');
 	groupExists(group);
-	if (!allGroups[group].includes(allRights[r])) throw new Error("Группа не имеет данного права");
+	if (!allGroups[group].includes(allRights[r])) throw new Error('Группа не имеет данного права');
 	let rg = allGroups[group].indexOf(right);
 	allGroups[group].splice(rg, 1);
 };
 
 function login(username, password) {
-	if (typeof(allUsers) == "undefined") throw new Error("База пользователей не существует");
-	if (typeof(username) != "string" || typeof(password) != "string") throw new Error("Входной параметр не имеет тип string");
+	if (typeof(allUsers) == 'undefined') throw new Error('База пользователей не существует');
+	if (typeof(username) != 'string' || typeof(password) != 'string') throw new Error('Входной параметр не имеет тип string');
 	if (session.includes(username)) return false;
-	var boolka = false;
+	var allow = false;
 	for (index = 0; index < allUsers.length; index++)
-		if (allUsers[index].nickname != username || allUsers[index].password != password) throw new Error("Указаны неверные данные")
-		else boolka = true;
-	else {
-		currentID = session.length;
-		session[currentID] = username;
-		currentUser = username;
+		if (allUsers[index].nickname == username && allUsers[index].password == password) allow = true;
+	if (allow) {
+	currentID = session.length;
+	session[currentID] = username;
+	currentNick = username;
 	}
-	return boolka;
-};
-
+	else throw new Error('Введённые данные некорректны');
+	return allow;
+}
+	
 function login(username) {//гостевой логин
-	if (typeof(allUsers) == "undefined") throw new Error("База пользователей не существует");
-	if (typeof(username) != "string") throw new Error("Входной параметр не имеет тип string");
+	if (typeof(allUsers) == 'undefined') throw new Error('База пользователей не существует');
+	if (typeof(username) != 'string') throw new Error('Входной параметр не имеет тип string');
 	if (session.includes(username)) return false;
 	for (index = 0; index < allUsers.length; index++)
-		if (allUsers[index].nickname == username) throw new Error("Этот никнейм уже занят");
+		if (allUsers[index].nickname == username) throw new Error('Этот никнейм уже занят');
 	else {
 		currentID = session.length;
 		session[currentID] = username;
-		currentUser = username;
+		currentNick = username;
 		let user = {};
 		user.nickname = username;
 		user.password = undefined;
-		user.groups = ["guest"];
+		user.groups = ['guest'];
 		allUsers.push(user);
 	}
 	return true;
 };
 
 function currentUser() {
-	let i = session.indexOf(currentUser)
-	if (currentUser != session[i]) throw new Error("Ваш профиль был удалён администратором");
+	let i = session.indexOf(currentNick)
+	if (currentNick != session[i]) throw new Error('Ваш профиль был удалён администратором');
   if (i == -1) return undefined;
 	else for (index = 0; index < allUsers.length; index++)
-		if (allUsers[index].nickname == currentUser) return allUsers[index];
+		if (allUsers[index].nickname == currentNick) return allUsers[index];
 	return undefined;
 };
 
 function logout() {
-	let i = session.indexOf(currentUser)
+	let i = session.indexOf(currentNick)
   session.splice(i, 1)
 	currentID = undefined;
-	currentUser = undefined;
+	currentNick = undefined;
 };
 
 function isAuthorized(user, right) {
-if (typeof(allUsers) == "undefined") throw new Error("База пользователей не существует");
-	if (typeof(allRights) == "undefined") throw new Error("База прав не существует");
-	if (typeof(allGroups) == "undefined") throw new Error("База групп не существует");
-	if (typeof(user) != "object") throw new Error("Входной параметр не имеет тип object");
-	if (Object.keys(user)[0] != "nickname" || Object.keys(user)[1] != "password" || Object.keys(user)[2] != "groups")
-		throw new Error("Входной параметр не имеет необходимых ключей");
+if (typeof(allUsers) == 'undefined') throw new Error('База пользователей не существует');
+	if (typeof(allRights) == 'undefined') throw new Error('База прав не существует');
+	if (typeof(allGroups) == 'undefined') throw new Error('База групп не существует');
+	if (typeof(user) != 'object') throw new Error('Входной параметр не имеет тип object');
+	if (Object.keys(user)[0] != 'nickname' || Object.keys(user)[1] != 'password' || Object.keys(user)[2] != 'groups')
+		throw new Error('Входной параметр не имеет необходимых ключей');
 	let r = allRights.indexOf(right);
-	if (r == -1) throw new Error("Заданного права не существует");
+	if (r == -1) throw new Error('Заданного права не существует');
 	let u = userExists(user);
 	let grs = allUsers[u].groups;
-	if (grs.length == 0) throw new Error("Пользователь не состоит в группах");
+	if (grs.length == 0) throw new Error('Пользователь не состоит в группах');
 	let rights = [];
 	for (let i = 0; i < grs.length; i++)
 		rights = rights.concat(allGroups[grs[i]]);
@@ -259,3 +259,24 @@ if (typeof(allUsers) == "undefined") throw new Error("База пользова�
 	if (rights.includes(right)) return true;
 	else return false;
 };
+
+var session = ['admin', 'mossad', 'carrottop', undefined, 'patriot007', 'Kilg%re'];
+session.push(undefined);
+var currentID = session.length;
+var currentNick = undefined;
+
+var rightCounter = 0;
+var groupCounter = 0;
+var allUsers = [
+	{nickname: "admin", password: "1234", groups: ["admin", "manager", "user"]},
+	{nickname: "sobakajozhec", password: "ekh228", groups: ["user", "manager"]},
+	{nickname: "patriot007", password: "russiaFTW", groups: ["user"]},
+	{nickname: undefined, password: undefined, groups: ["guest"]}
+];
+var allRights = ["manage content", "play games", "delete users", "view site"];
+var allGroups = {
+	"admin": [allRights[2], allRights[3]],
+	"manager": [allRights[0], allRights[3]],
+	"user": [allRights[1], allRights[3]],
+  "guest": [allRights[3]]
+}
