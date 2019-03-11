@@ -1,27 +1,3 @@
-var session = ['admin', 'mossad', 'carrottop', undefined, 'patriot007', 'Kilg%re'];
-session.push(undefined);
-var currentID = session.length;
-var currentUser = undefined;
-
-var rightCounter = 0;
-var groupCounter = 0;
-
-var allUsers = [
-	{nickname: "admin", password: "1234", groups: ["admin", "manager", "user"]},
-	{nickname: "sobakajozhec", password: "ekh228", groups: ["user", "manager"]},
-	{nickname: "patriot007", password: "russiaFTW", groups: ["user"]},
-	{nickname: "stepanic", password: undefined, groups: ["guest"]}
-];
-
-var allRights = ["manage content", "play games", "delete users", "view site"];
-
-var allGroups = {
-	"admin": [allRights[2], allRights[3]],
-	"manager": [allRights[0], allRights[3]],
-	"user": [allRights[1], allRights[3]],
-  "guest": [allRights[3]]
-}
-
 function users() {
 	if (typeof(allUsers) == "undefined") throw new Error("База пользователей не существует");
 	return allUsers;
