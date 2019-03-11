@@ -10,7 +10,7 @@ var allUsers = [
 	{nickname: "admin", password: "1234", groups: ["admin", "manager", "user"]},
 	{nickname: "sobakajozhec", password: "ekh228", groups: ["user", "manager"]},
 	{nickname: "patriot007", password: "russiaFTW", groups: ["user"]},
-	{nickname: "stepanic", password; undefined, groups: ["guest"]}
+	{nickname: "stepanic", password: undefined, groups: ["guest"]}
 ];
 
 var allRights = ["manage content", "play games", "delete users", "view site"];
