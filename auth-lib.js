@@ -18,15 +18,16 @@ var allGroups = {
 }
 
 function createUser(username, password) {
-  if (typeof(username) != "string" || typeof(password) != "string") throw new Error("Входной параметр не имеет тип string");
-  for (index = 0; index < allUsers.length; index++)
-    if (allUsers[index].nickname == username) throw new Error("Пользователь с таким ником уже существует");
+	if (typeof(allUsers) == "undefined") throw new Error("База пользователей не существует")
+	if (typeof(username) != "string" || typeof(password) != "string") throw new Error("Входной параметр не имеет тип string");
+	for (index = 0; index < allUsers.length; index++)
+		if (allUsers[index].nickname == username) throw new Error("Пользователь с таким ником уже существует");
 	let newUser = {};
-  newUser.nickname = username;
-  newUser.password = password;
-  newUser.groups = ["user"];
-  allUsers.push(newUser);
-  return newUser;
+	newUser.nickname = username;
+	newUser.password = password;
+	newUser.groups = ["user"];
+	allUsers.push(newUser);
+	return newUser;
 }
 
 function compareUsers(u1, u2) {
@@ -40,49 +41,105 @@ function compareUsers(u1, u2) {
 }
 
 function userExists(user) {
+	if (typeof(user) != "object") throw new Error("Входной параметр не имеет тип object");
 	let index = -1;
 	for (let i = 0; i < allUsers.length; i++) {
 		if (compareUsers(user, allUsers[i])) index = i;
 	}
 	if (index == -1) throw new Error("Указанного пользователя не существует");
-  return true;
+  return index;
 }
 
 function deleteUser(user) {
-  if (typeof(user) != "object") throw new Error("Входной параметр не имеет тип object");
-  if (Object.keys(user)[0] != "nickname" || 
-			Object.keys(user)[1] != "password" || 
-			Object.keys(user)[2] != "groups") throw new Error("Входной параметр не имеет необходимых ключей");
-  if (userExists(user)) allUsers.splice(index, 1);
+	if (typeof(allUsers) == "undefined") throw new Error("База пользователей не существует")
+	if (typeof(user) != "object") throw new Error("Входной параметр не имеет тип object");
+	if (Object.keys(user)[0] != "nickname" || Object.keys(user)[1] != "password" || Object.keys(user)[2] != "groups")
+		throw new Error("Входной параметр не имеет необходимых ключей");
+	allUsers.splice(userExists(user), 1);
 }
 
 function users() {
+	if (typeof(allUsers) == "undefined") throw new Error("База пользователей не существует")
 	return allUsers;
 }
 
 function createGroup() {
+	if (typeof(allGroups) == "undefined") throw new Error("База групп не существует")
 	let name = "group" + groupCounter++;
 	allGroups[name] = [];
 }
 
-function deleteGroup(group) {
+function groupExists(group) { //вспомогательный
+	if (typeof(group) == "string") throw new Error("Входной параметр не имеет тип string") 
 	let index = -1;
 	for (let i = 0; i < Object.keys(allGroups).length; i++) {
 		if (Object.keys(allGroups)[i] == group) index = i;
 	}
 	if (index == -1) throw new Error("Указанной группы не существует");
+	return index;
+}
+
+function deleteGroup(group) {
+	if (typeof(allGroups) == "undefined") throw new Error("База групп не существует")
+	if (typeof(group) == "string") throw new Error("Входной параметр не имеет тип string") 
+	groupExists(group);
+	let count = 0;
+	for (let i = 0; i < allUsers.length; i++)
+		if (allUsers[i].groups.includes(group)) count++;
+	if (count) throw new Error("Нельзя удалить группу, в которой состоят пользователи")
+		//вариант - сначала удалить всех пользователей из группы, потом удалить группу
+		//removeUserFromGroup(allUsers, group)
 	delete allGroups[group];
 }
 
-function groups() {};
+function deleteGroupAnyway(group) {//альтернативный
+	if (typeof(allGroups) == "undefined") throw new Error("База групп не существует")
+	if (typeof(group) == "string") throw new Error("Входной параметр не имеет тип string") 
+	groupExists(group);
+	for (let i = 0; i < allUsers.length; i++)
+		removeUserFromGroup(allUsers, group)
+	delete allGroups[group];
+}
 
-function addUserToGroup() {};
-
-function userGroups(user) {
-	if (!userExists(user)) throw new Error("Указанного пользователя не существует")
+function groups() {
+	if (typeof(allGroups) == "undefined") throw new Error("База групп не существует")
+	return allGroups;
 };
 
-function removeUserFromGroup() {};
+function userGroups(user) {
+	if (typeof(allUsers) == "undefined") throw new Error("База пользователей не существует")
+	if (typeof(user) != "object") throw new Error("Входной параметр не имеет тип object");
+	if (Object.keys(user)[0] != "nickname" || Object.keys(user)[1] != "password" || Object.keys(user)[2] != "groups")
+		throw new Error("Входной параметр не имеет необходимых ключей");
+	let u = userExists(user);
+	if (typeof(allUsers[u].groups) == undefined) throw new Error("Пользователь не состоит в каких-либо группах")
+	return allUsers[u].groups;
+}
+
+function addUserToGroup(user, group) {
+	if (typeof(allUsers) == "undefined") throw new Error("База пользователей не существует")
+	if (typeof(allGroups) == "undefined") throw new Error("База групп не существует")
+	if (typeof(user) != "object") throw new Error("Входной параметр не имеет тип object");
+	if (Object.keys(user)[0] != "nickname" || Object.keys(user)[1] != "password" || Object.keys(user)[2] != "groups")
+		throw new Error("Входной параметр не имеет необходимых ключей");
+	let u = userExists(user);
+	if (typeof(group) != "string") throw new Error("Входной параметр не имеет тип string");
+	let g = groupExists(group);
+	allUsers[u].groups.push(allGroups[g])
+}
+
+function removeUserFromGroup(user, group) {
+	if (typeof(allUsers) == "undefined") throw new Error("База пользователей не существует")
+	if (typeof(allGroups) == "undefined") throw new Error("База групп не существует")
+	if (typeof(user) != "object") throw new Error("Входной параметр не имеет тип object");
+	if (Object.keys(user)[0] != "nickname" || Object.keys(user)[1] != "password" || Object.keys(user)[2] != "groups")
+		throw new Error("Входной параметр не имеет необходимых ключей");
+	let u = userExists(user);
+	if (typeof(group) != "string") throw new Error("Входной параметр не имеет тип string");
+	let g = groupExists(group);
+	allUsers[u].groups.includes(allGroups[g])
+	allUsers[u].groups.splice(g, 1);
+}
 
 function createRight() {};
 
