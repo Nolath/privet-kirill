@@ -136,6 +136,7 @@ function createRight() {
 	if (typeof(allRights) == 'undefined') throw new Error('База прав не существует');
 	let name = 'right' + rightCounter++;
 	allRights.push(name);
+	return allRights[allRights.length];
 };
 
 function deleteRight(right) {
