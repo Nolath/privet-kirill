@@ -25,6 +25,12 @@ function compareUsers(u1, u2) {//вспомогательный
 	return true;
 };
 
+function compareAccounts(u1, u2) {//вспомогательный
+	if (u1.nickname !== u2.nickname) return false;
+	if (u1.password !== u2.password) return false;
+	return true;
+};
+
 function userExists(user) {//вспомогательный
 	if (typeof(user) != 'object') throw new Error('Входной параметр не имеет тип object');
 	let index = -1;
@@ -42,14 +48,13 @@ function deleteUser(user) {
 	if (typeof(user) != 'object') throw new Error('Входной параметр не имеет тип object');
 	if (Object.keys(user)[0] != 'nickname' || Object.keys(user)[1] != 'password' || Object.keys(user)[2] != 'groups')
 		throw new Error('Входной параметр не имеет необходимых ключей');
-	if (session.includes(user.nickname)) session.splice(session.indexOf(user.nickname), 1);
 	allUsers.splice(userExists(user), 1);
 };
 
 function groups() {
 	if (typeof(allRights) == 'undefined') throw new Error('База прав не существует');
 	if (typeof(allGroups) == 'undefined') throw new Error('База групп не существует');
-	return allGroups;
+	return Object.keys(allGroups);
 };
 
 function createGroup() {
@@ -57,40 +62,34 @@ function createGroup() {
 	if (typeof(allGroups) == 'undefined') throw new Error('База групп не существует');
 	let name = 'group' + groupCounter++;
 	allGroups[name] = [];
+	let i = Object.keys(allGroups).length;
+	return Object.keys(allGroups)[i - 1];
 };
 
 function groupExists(group) { //вспомогательный
-	if (typeof(group) == 'string') throw new Error('Входной параметр не имеет тип string');
+	if (typeof(group) != 'string') throw new Error('Входной параметр {group} не имеет тип string'.replace('{group}', group).replace('{group}', group));
 	let index = -1;
 	for (let i = 0; i < Object.keys(allGroups).length; i++)
 		if (Object.keys(allGroups)[i] == group) {
 			index = i;
 			break;
 	}
-	if (index == -1) throw new Error('Указанной группы не существует');
 	return index;
 };
 
 function deleteGroup(group) {
 	if (typeof(allRights) == 'undefined') throw new Error('База прав не существует');
 	if (typeof(allGroups) == 'undefined') throw new Error('База групп не существует');
-	if (typeof(group) == 'string') throw new Error('Входной параметр не имеет тип string');
-	groupExists(group);
-	let count = 0;
+	let g = groupExists(group);
+	if (g == -1) throw new Error('Указанной группы не существует');
+	let count = [];
 	for (let i = 0; i < allUsers.length; i++)
-		if (allUsers[i].groups.includes(group)) count++;
-	if (count) throw new Error('Нельзя удалить группу, в которой состоят пользователи')
+		if (allUsers[i].groups.includes(group)) count.push(allUsers[i]);
+	if (count.length != 0)
+	for (let j = 0; j < count.length; j++)
+		removeUserFromGroup(count[j], group);
 	delete allGroups[group];
-};
-
-function deleteGroupAnyway(group) {//альтернативный
-	if (typeof(allRights) == 'undefined') throw new Error('База прав не существует');
-	if (typeof(allGroups) == 'undefined') throw new Error('База групп не существует');
-	if (typeof(group) == 'string') throw new Error('Входной параметр не имеет тип string');
-	groupExists(group);
-	for (let i = 0; i < allUsers.length; i++)
-		removeUserFromGroup(allUsers, group);
-	delete allGroups[group];
+	arguments[0] = undefined;
 };
 
 function userGroups(user) {
@@ -99,7 +98,7 @@ function userGroups(user) {
 	if (Object.keys(user)[0] != 'nickname' || Object.keys(user)[1] != 'password' || Object.keys(user)[2] != 'groups')
 		throw new Error('Входной параметр не имеет необходимых ключей');
 	let u = userExists(user);
-	if (typeof(allUsers[u].groups) == undefined || allUsers[u].groups.length == 0) 
+	if (typeof(allUsers[u].groups) == undefined) 
 		throw new Error('Пользователь не состоит в каких-либо группах');
 	return allUsers[u].groups;
 };
@@ -112,10 +111,9 @@ function addUserToGroup(user, group) {
 	if (Object.keys(user)[0] != 'nickname' || Object.keys(user)[1] != 'password' || Object.keys(user)[2] != 'groups')
 		throw new Error('Входной параметр не имеет необходимых ключей');
 	let u = userExists(user);
-	if (typeof(group) != 'string') throw new Error('Входной параметр не имеет тип string');
 	let g = groupExists(group);
-	if (allUsers[u].groups.includes(Object.keys(allGroups)[g])) throw new Error('Пользователь уже состоит в этой группе');
-	allUsers[u].groups.push(Object.keys(allGroups)[g]);
+	if (!allUsers[u].groups.includes(Object.keys(allGroups)[g])) allUsers[u].groups.push(Object.keys(allGroups)[g]);
+	//else throw new Error('Пользователь уже состоит в этой группе'); //тест ругался на эту штуку
 };
 
 function removeUserFromGroup(user, group) {
@@ -126,17 +124,20 @@ function removeUserFromGroup(user, group) {
 	if (Object.keys(user)[0] != 'nickname' || Object.keys(user)[1] != 'password' || Object.keys(user)[2] != 'groups')
 		throw new Error('Входной параметр не имеет необходимых ключей');
 	let u = userExists(user);
-	if (typeof(group) != 'string') throw new Error('Входной параметр не имеет тип string');
 	let g = groupExists(group);
+	if (g == -1) throw new Error('Указаной группы не существует');
 	if (!allUsers[u].groups.includes(Object.keys(allGroups)[g])) throw new Error('Пользователь не состоит в этой группе');
-	allUsers[u].groups.splice(g, 1);
+	else {
+		let ug = allUsers[u].groups.indexOf(group);
+		allUsers[u].groups.splice(ug, 1);
+	}
 };
 
 function createRight() {
 	if (typeof(allRights) == 'undefined') throw new Error('База прав не существует');
 	let name = 'right' + rightCounter++;
 	allRights.push(name);
-	return allRights[allRights.length];
+	return allRights[allRights.length - 1];
 };
 
 function deleteRight(right) {
@@ -144,6 +145,11 @@ function deleteRight(right) {
 	if (typeof(right) != 'string') throw new Error('Входной параметр не имеет тип string');
 	let r = allRights.indexOf(right);
 	if (r == -1) throw new Error('Заданного права не существует');
+	for (var key in allGroups)
+	{
+		let k = allGroups[key].indexOf(right)
+		if (k != -1) allGroups[key].splice(k, 1);
+	}
 	allRights.splice(r, 1);
 };
 
@@ -168,8 +174,8 @@ function addRightToGroup(right, group) {
 	let r = allRights.indexOf(right);
 	if (r == -1) throw new Error('Заданного права не существует');
 	groupExists(group);
-	if (allGroups[group].includes(allRights[r])) throw new Error('Группа уже имеет данное право');
-	allGroups[group].push(allRights[r]);
+	if (!allGroups[group].includes(allRights[r])) allGroups[group].push(allRights[r]);
+	//else throw new Error('Группа уже имеет данное право'); //тест ругался на эту штуку
 };
 
 function removeRightFromGroup(right, group) {
@@ -188,52 +194,29 @@ if (typeof(allRights) == 'undefined') throw new Error('База прав не с
 function login(username, password) {
 	if (typeof(allUsers) == 'undefined') throw new Error('База пользователей не существует');
 	if (typeof(username) != 'string' || typeof(password) != 'string') throw new Error('Входной параметр не имеет тип string');
-	if (session.includes(username)) return false;
-	var allow = false;
-	for (index = 0; index < allUsers.length; index++)
-		if (allUsers[index].nickname == username && allUsers[index].password == password) allow = true;
-	if (allow) {
-	currentID = session.length;
-	session[currentID] = username;
-	currentNick = username;
+	let user = {nickname: username, password: password};
+	let temp = -1;
+	for (let i = 0; i < allUsers.length; i++) {
+		if (compareAccounts(user, allUsers[i])) {
+			user = allUsers[i];
+			temp = i;
+			break;
+		}
 	}
-	else throw new Error('Введённые данные некорректны');
-	return allow;
+	if (temp == -1) throw new Error("Указаны неверные данные");
+	if (logged == undefined) {
+		logged = user;
+		return true;
+	}
+	return false;
 }
-	
-function login(username) {//гостевой логин
-	if (typeof(allUsers) == 'undefined') throw new Error('База пользователей не существует');
-	if (typeof(username) != 'string') throw new Error('Входной параметр не имеет тип string');
-	if (session.includes(username)) return false;
-	for (index = 0; index < allUsers.length; index++)
-		if (allUsers[index].nickname == username) throw new Error('Этот никнейм уже занят');
-	else {
-		currentID = session.length;
-		session[currentID] = username;
-		currentNick = username;
-		let user = {};
-		user.nickname = username;
-		user.password = undefined;
-		user.groups = ['guest'];
-		allUsers.push(user);
-	}
-	return true;
-};
 
 function currentUser() {
-	let i = session.indexOf(currentNick)
-	if (currentNick != session[i]) throw new Error('Ваш профиль был удалён администратором');
-  if (i == -1) return undefined;
-	else for (index = 0; index < allUsers.length; index++)
-		if (allUsers[index].nickname == currentNick) return allUsers[index];
-	return undefined;
+	return logged;
 };
 
 function logout() {
-	let i = session.indexOf(currentNick)
-  session.splice(i, 1)
-	currentID = undefined;
-	currentNick = undefined;
+	logged = undefined;
 };
 
 function isAuthorized(user, right) {
@@ -261,23 +244,70 @@ if (typeof(allUsers) == 'undefined') throw new Error('База пользова�
 	else return false;
 };
 
-var session = ['admin', 'mossad', 'carrottop', undefined, 'patriot007', 'Kilg%re'];
-session.push(undefined);
-var currentID = session.length;
-var currentNick = undefined;
+//сила полезного действия
 
+var logged = undefined;
 var rightCounter = 0;
 var groupCounter = 0;
 var allUsers = [
 	{nickname: "admin", password: "1234", groups: ["admin", "manager", "user"]},
 	{nickname: "sobakajozhec", password: "ekh228", groups: ["user", "manager"]},
 	{nickname: "patriot007", password: "russiaFTW", groups: ["user"]},
-	{nickname: undefined, password: undefined, groups: ["guest"]}
+	{nickname: "SimeonLoki", password: undefined, groups: ["guest"]}
 ];
 var allRights = ["manage content", "play games", "delete users", "view site"];
 var allGroups = {
 	"admin": [allRights[2], allRights[3]],
 	"manager": [allRights[0], allRights[3]],
 	"user": [allRights[1], allRights[3]],
-  "guest": [allRights[3]]
+	"guest": [allRights[3]]
 }
+
+createUser('vassily', '123GTRA');
+createUser('Ig0rs', 'longenoughpassword');
+createUser('Kilg%re', 'kill_the_flash');
+createUser('ashot_oneshot', 'n4rdY');
+users();
+for (let i = 0; i < 3; i++) {
+	createRight();	
+}
+rights()
+for (let i = 0; i < 2; i++) {
+	createGroup();	
+}
+groups()
+addRightToGroup(allRights[allRights.length - 3], allGroups[Object.keys(allGroups)[Object.keys(allGroups).length - 2]]);
+addRightToGroup(allRights[allRights.length - 2], allGroups[Object.keys(allGroups)[Object.keys(allGroups).length - 1]]);
+addRightToGroup(allRights[allRights.length - 3], allGroups[Object.keys(allGroups)[Object.keys(allGroups).length - 1]]);
+addRightToGroup(allRights[allRights.length - 3], allGroups[Object.keys(allGroups)[0]]);
+addRightToGroup(allRights[allRights.length - 1], allGroups[Object.keys(allGroups)[0]]);
+groupRights(Object.keys(allGroups)[0]);
+groupRights(Object.keys(allGroups)[Object.keys(allGroups).length - 2]);
+groupRights(Object.keys(allGroups)[Object.keys(allGroups).length - 1]);
+addUserToGroup(allUsers[allUsers.length - 4], allGroups[Object.keys(allGroups)[Object.keys(allGroups).length - 2]])
+addUserToGroup(allUsers[allUsers.length - 3], allGroups[Object.keys(allGroups)[Object.keys(allGroups).length - 2]])
+addUserToGroup(allUsers[allUsers.length - 2], allGroups[Object.keys(allGroups)[Object.keys(allGroups).length - 2]])
+addUserToGroup(allUsers[allUsers.length - 2], allGroups[Object.keys(allGroups)[0]])
+addUserToGroup(allUsers[allUsers.length - 1], allGroups[Object.keys(allGroups)[0]])
+userGroups(allUsers[allUsers.length - 4]);
+userGroups(allUsers[allUsers.length - 3]);
+userGroups(allUsers[allUsers.length - 2]);
+userGroups(allUsers[allUsers.length - 1]);
+deleteUser(allUsers[allUsers.length - 3]);
+deleteUser(allUsers[1]);
+deleteGroup(allGroups[Object.keys(allGroups)[Object.keys(allGroups).length - 1]]);
+deleteGroup(allGroups[Object.keys(allGroups)[3]]);
+deleteRight(allRights[allRights.length - 2]);
+deleteRight(allRights[2]);
+removeUserFromGroup(allUsers[allUsers.length - 3], allGroups[Object.keys(allGroups)[Object.keys(allGroups).length - 2]]);
+removeUserFromGroup(allUsers[0], 'manager');
+removeRightFromGroup(allRights[allRights.length - 1], allGroups[Object.keys(allGroups)[0]]);
+removeRightFromGroup(allRights[allRights.length - 3], allGroups[Object.keys(allGroups)[Object.keys(allGroups).length - 2]]);
+
+currentUser();
+login('vassily', '123GTRA');
+currentUser();
+isAuthorized(currentUser(), 'play games')
+isAuthorized(currentUser(), allRights[allRights.length - 1])
+logout();
+currentUser();
